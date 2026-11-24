@@ -1,0 +1,126 @@
+<div class="page-container">
+
+  <header class="page-header">
+    <div>
+      <h2>Run Review</h2>
+      <p>Review allocation results and gap details.</p>
+    </div>
+
+    @if (run(); as current) {
+      <span class="run-id">{{ current.runIdentifier }}</span>
+    }
+  </header>
+
+  <!-- Loading (sirf pehli baar, jab tak data nahi aaya) -->
+  @if (loading() && !run()) {
+    <div class="state-message">Loading run details...</div>
+  }
+
+  <!-- Error -->
+  @if (!loading() && errorMessage()) {
+    <div class="state-message error">
+      <p>{{ errorMessage() }}</p>
+      <button type="button" (click)="loadRunReview()">Retry</button>
+    </div>
+  }
+
+  <!-- Run Details -->
+  @if (run(); as runData) {
+
+    <section class="summary-grid">
+      <div class="summary-card">
+        <span>Run Date</span>
+        <h3>{{ runData.runDate | date: 'dd MMM yyyy' }}</h3>
+      </div>
+
+      <div class="summary-card">
+        <span>Total Allocated Units</span>
+        <h3>{{ runData.totalAllocatedUnits }}</h3>
+      </div>
+
+      <div class="summary-card">
+        <span>Total Gaps</span>
+        <h3>{{ runData.totalGaps }}</h3>
+      </div>
+
+      <div class="summary-card">
+        <span>Filled</span>
+        <h3>{{ runData.filledCount }}</h3>
+      </div>
+
+      <div class="summary-card">
+        <span>Partially Filled</span>
+        <h3>{{ runData.partiallyFilledCount }}</h3>
+      </div>
+
+      <div class="summary-card">
+        <span>Unfilled</span>
+        <h3>{{ runData.unfilledCount }}</h3>
+      </div>
+    </section>
+
+    <!-- Gap Details -->
+    <section class="table-card">
+
+      <div class="table-header">
+        <h3>Gap Details</h3>
+
+        <label class="filter-option">
+          <input
+            type="checkbox"
+            [checked]="exceptionsOnly()"
+            (change)="exceptionsOnly.set($any($event.target).checked); loadRunReview()"
+          />
+          Exceptions Only
+        </label>
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Gap ID</th>
+              <th>Store</th>
+              <th>Brand</th>
+              <th>Product Type</th>
+              <th>Original Shortfall</th>
+              <th>Allocated Units</th>
+              <th>Remaining Units</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (gap of runData.gaps; track gap.gapIdentifier) {
+              <tr>
+                <td>{{ gap.gapIdentifier }}</td>
+                <td>{{ gap.store }}</td>
+                <td>{{ gap.brand }}</td>
+                <td>{{ gap.productType }}</td>
+                <td>{{ gap.originalShortfall }}</td>
+                <td>{{ gap.allocatedUnits }}</td>
+                <td>{{ gap.remainingUnits }}</td>
+                <td>
+                  <span
+                    class="status"
+                    [class.filled]="gap.status === 'Filled'"
+                    [class.partial]="gap.status === 'Partially filled'"
+                    [class.unfilled]="gap.status === 'Unfilled'"
+                  >
+                    {{ gap.status }}
+                  </span>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="8" class="empty-cell">No gap records found.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+    </section>
+  }
+
+</div>

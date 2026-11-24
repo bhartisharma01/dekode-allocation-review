@@ -1,0 +1,110 @@
+<div class="page-container">
+  <header class="page-header">
+    <div>
+      <h2>Allocation Run History</h2>
+      <p>View and review previously saved allocation runs.</p>
+    </div>
+
+    <button type="button" (click)="logout()">
+      Logout
+    </button>
+  </header>
+
+  <section class="table-card">
+
+    <div class="table-header">
+      <h3>Saved Runs</h3>
+
+      <span class="record-count">
+        {{ totalCount() }} total runs
+      </span>
+    </div>
+
+    @if(loading()){
+    <div class="state-message">
+      <p>Loading run history...</p>
+    </div>
+    }
+
+    @if(!loading() && errorMessage()){
+    <div class="state-message error">
+      <p>{{ errorMessage() }}</p>
+
+      <button type="button" (click)="retry()">
+        Retry
+      </button>
+    </div>
+    }
+
+    @if(!loading() && !errorMessage() && runs().length === 0){
+    <div class="state-message">
+      <p>No allocation runs found.</p>
+    </div>
+    }
+
+
+    @if(!loading() && !errorMessage() && runs().length > 0){
+    <div class="table-wrapper">
+      <table>
+
+        <thead>
+          <tr>
+            <th>Run Identifier</th>
+            <th>Run Date</th>
+            <th>Total Allocated Units</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @for (run of runs(); track run.runIdentifier) {
+          <tr>
+            <td class="run-id">{{ run.runIdentifier }}</td>
+
+            <td>{{ run.runDate | date: 'dd MMM yyyy' }}</td>
+
+            <td>{{ run.totalAllocatedUnits }}</td>
+
+            <td>
+              <a [routerLink]="['/runs', run.runIdentifier]" class="view-link">
+                View Details
+              </a>
+            </td>
+          </tr>
+          }
+        </tbody>
+
+      </table>
+    </div>
+    }
+
+    <!-- Pagination -->
+    @if(!loading() && !errorMessage() && totalCount() > 0){
+    <div class="pagination">
+
+      <span class="pagination-info">
+        Showing {{ startRecord() }}–{{ endRecord() }}
+        of {{ totalCount() }} runs
+      </span>
+
+      <div class="pagination-actions">
+
+        <button type="button" (click)="previousPage()" [disabled]="page() <= 1">
+          Previous
+        </button>
+
+        <span>
+          Page {{ page() }} of {{ totalPages() }}
+        </span>
+
+        <button type="button" (click)="nextPage()" [disabled]="page() >= totalPages()">
+          Next
+        </button>
+
+      </div>
+    </div>
+    }
+
+  </section>
+
+</div>
